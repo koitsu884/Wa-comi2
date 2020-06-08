@@ -1,0 +1,59 @@
+<?php
+
+/** @var \Illuminate\Database\Eloquent\Factory $factory */
+
+use App\Models\Group;
+use App\Models\GroupMember;
+use App\Models\Image;
+use App\Models\Post;
+use App\User;
+use Faker\Generator as Faker;
+
+$factory->define(Image::class, function (Faker $faker) {
+    $imagenableType =  $faker->randomElement([
+        Group::class,
+        Post::class,
+    ]);
+
+    $imagenableId = 0;
+    $user_id = 0;
+
+    if ($imagenableType == Group::class) {
+        $imagenableId = Group::all()->random()->id;
+        $user_id = GroupMember::where('group_id', $imagenableId)
+            ->inRandomOrder()
+            ->first()
+            ->user_id;
+    } else {
+        $post = Post::all()->random();
+        $imagenableId = $post->id;
+        $user_id = $post->user_id;
+    }
+
+    return [
+        'user_id' => $user_id,
+        'imageable_type' => $imagenableType,
+        'imageable_id' => $imagenableId,
+        'url' => $faker->randomElement([
+            'https://koitsutohitsuzi.xyz/wordpress/wp-content/uploads/2020/05/DSC_0720.jpg',
+            'https://koitsutohitsuzi.xyz/wordpress/wp-content/uploads/2020/05/DSC_0734.jpg',
+            'https://koitsutohitsuzi.xyz/wordpress/wp-content/uploads/2018/01/DSC08407.jpg',
+            'https://koitsutohitsuzi.xyz/wordpress/wp-content/uploads/2018/03/DSC02450.jpg',
+            'https://koitsutohitsuzi.xyz/wordpress/wp-content/uploads/2018/03/DSC08071.jpg'
+        ]),
+    ];
+});
+
+$factory->state(Image::class, 'post', function (Faker $faker) {
+    return [
+        'imageable_type' => Post::class,
+        'imageable_id' => Post::all()->random()->id,
+    ];
+});
+
+$factory->state(Image::class, 'group', function (Faker $faker) {
+    return [
+        'imageable_type' => Group::class,
+        'imageable_id' => Group::all()->random()->id,
+    ];
+});

@@ -1,0 +1,20 @@
+
+export const SET_LOADING = 'SET_LOADING';
+export const SET_AREA_LIST = 'SET_AREA_LIST';
+export const SET_POST_CATEGORIES = 'SET_POST_CATEGORIES';
+export const SET_GROUP_CATEGORIES = 'SET_GROUP_CATEGORIES';
+
+export const SET_CURRENT_USER = 'SET_CURRENT_USER';
+
+//--- Home ---
+export const SET_LATEST_GROUP_LIST = 'SET_LATEST_GROUP_LIST';
+export const SET_LATEST_POST_LIST = 'SET_LATEST_POST_LIST';
+
+//--- Post Search ---
+export const SET_POST_SEARCH_RESULT = 'SET_POST_SEARCH_RESULT';
+export const SET_POST_SEARCH_AREA = 'SET_POST_SEARCH_AREA';
+export const SET_POST_SEARCH_CATEGORIES = 'SET_POST_SEARCH_CATEGORIES';
+
+//--- Form Errors ---
+export const SET_ERRORS = 'SET_ERRORS';
+export const CLEAR_ERRORS = 'CLEAR_ERRORS';

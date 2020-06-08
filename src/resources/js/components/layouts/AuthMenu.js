@@ -1,0 +1,83 @@
+import React, { useState, Fragment } from 'react';
+import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { Drawer, Avatar, Button, Typography, IconButton, Box, Divider, List, ListItemIcon, ListItemText, ListItem } from '@material-ui/core';
+import { logout } from '../../actions/authActions';
+import { makeStyles } from '@material-ui/styles';
+import { Cancel, AccountCircle } from '@material-ui/icons';
+
+const useStyles = makeStyles((theme) => ({
+    menu: {
+        '& .header': {
+            width: '20rem',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '1rem',
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            '& .title': {
+                flexGrow: 1,
+                fontWeight: 700,
+                // fontWeight: 'bold',
+                fontSize: '1.8rem'
+            }
+        },
+        '& .content': {
+            padding: '1rem'
+        }
+    },
+}));
+
+const AuthMenu = () => {
+    const dispatch = useDispatch();
+    const classes = useStyles();
+    const user = useSelector(state => state.auth.user);
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    const toggleDrawer = () => setMenuOpen(!menuOpen);
+    const handleLogout = () => {
+        dispatch(logout());
+        setMenuOpen(false);
+    }
+
+
+    if (user) {
+        return (
+            <div>
+                {
+                    user && user.avatar ? <Avatar alt="ユーザーメニュー" src={user.avatar} onClick={toggleDrawer} /> : <Avatar alt="ユーザーメニュー" onClick={toggleDrawer}>{user.name.charAt(0)}</Avatar>
+                }
+                <Drawer className={classes.menu} anchor={'right'} open={menuOpen} onClose={() => setMenuOpen(false)} >
+                    <div className='header'>
+                        <Box className='title'>メニュー</Box>
+                        <IconButton onClick={toggleDrawer}>
+                            <Cancel fontSize="large" />
+                        </IconButton>
+                    </div>
+                    <div className='content'>
+                        <List>
+                            <ListItem button  to="/mypage/account" component={Link}  onClick={toggleDrawer} >
+                                <ListItemIcon><AccountCircle /></ListItemIcon>
+                                <ListItemText primary={'プロフィール・アカウント編集'} />
+                            </ListItem>
+                        </List>
+                        <Divider />
+                        <Box mt={2} mx="auto" >
+
+                            <Button variant="contained" color="secondary" onClick={handleLogout}>ログアウト</Button>
+                        </Box>
+                    </div>
+                </Drawer>
+            </div>
+        )
+    }
+
+    return (
+        <Fragment>
+            <Button component={Link} to="/login" variant="contained" size="small" color="default" disableElevation>ログイン</Button>
+            <Button component={Link} to="/register" variant="contained" size="small" color="secondary" disableElevation>新規登録</Button>
+        </Fragment>
+    );
+}
+
+export default AuthMenu

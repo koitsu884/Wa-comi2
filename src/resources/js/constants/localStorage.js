@@ -1,0 +1,1 @@
+export const kTokenExpire = 'token_expires_in';
