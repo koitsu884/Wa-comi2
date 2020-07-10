@@ -9,6 +9,8 @@ class Image extends Model
 {
     use UserRelatable;
 
+    protected $table = 'images';
+
     protected $fillable = [
         'user_id',
         'url',

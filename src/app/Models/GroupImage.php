@@ -2,19 +2,9 @@
 
 namespace App\Models;
 
-use App\Traits\GroupRelatable;
-use App\Traits\UserRelatable;
-use Illuminate\Database\Eloquent\Model;
-
-class GroupImage extends Model
+class GroupImage extends Image
 {
-    use UserRelatable;
-    use GroupRelatable;
-
-    protected $fillable = [
-        'group_id',
-        'user_id',
-        'url',
-        'url_thumb',
-    ];
+    public function group(){
+        return $this->imageable();
+    }
 }

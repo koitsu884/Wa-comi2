@@ -10,7 +10,7 @@ services:
       - ./logs:/var/log/php
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
     working_dir: /var/www
-    # command: "php artisan serve --host=0.0.0.0 --port=8000"
+    #command: "php artisan serve --host=0.0.0.0 --port=8000"
     ports:
       - 8000:8000
     environment:

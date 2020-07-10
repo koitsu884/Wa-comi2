@@ -53,8 +53,6 @@ class UserPolicy
      */
     public function update(User $authenticatedUser, User $user)
     {
-        Log::debug($authenticatedUser);
-        Log::debug($user);
         return $authenticatedUser->id === $user->id;
     }
 

@@ -8,21 +8,28 @@ const useStyles = makeStyles((theme) => ({
         margin: 'auto',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        zIndex: 100,
     },
     cover: {
-        zIndex: 10,
         backgroundColor: 'rgba(0, 0, 0, .2)',
         top: 0,
         left: 0,
         position: 'absolute',
+    },
+    fix: {
+        top: 0,
+        left: 0,
+        position: 'fixed',
+        backgroundColor: 'rgba(0, 0, 0, .2)',
     }
 }));
 
-export default ({ cover }) => {
+export default ({ cover=false, fixed=false }) => {
     const classes = useStyles();
+    const positionClass = fixed ? classes.fix : cover ? classes.cover : '';
     return (
         // <div className={`spinner${cover ? " cover" : ""}`}><div className="spinner__inner"></div></div>
-        <div className={`${classes.root} ${cover ? classes.cover : ''}`}><CircularProgress /></div>
+        <div className={`${classes.root} ${positionClass}`}><CircularProgress /></div>
     )
 }

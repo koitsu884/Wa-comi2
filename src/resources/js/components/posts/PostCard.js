@@ -22,7 +22,7 @@ const PostCard = ({ post }) => {
         <Card className={classes.root}>
             <CardMedia
                 className={classes.mainImage}
-                image={post.main_image ? post.main_image : NoImage}
+                image={post.main_image ? post.main_image.url : NoImage}
                 title={post.title}
             />
 
@@ -31,7 +31,7 @@ const PostCard = ({ post }) => {
                 <div className={classes.userInfo}>
                     {
                         post.user.avatar
-                            ? <Avatar src={post.user.avatar} />
+                            ? <Avatar src={post.user.avatar.url} />
                             : <Avatar mr={2}>{post.user.name.charAt(0)}</Avatar>
                     }
                     <Box ml={2}>{post.user.name}</Box>

@@ -2,16 +2,17 @@
 
 namespace App;
 
-use App\Models\Group;
-use App\Models\GroupMember;
 use App\Models\Post;
-use App\Models\UserProfile;
+use App\Models\Group;
 use App\Traits\Imageable;
+use App\Models\GroupMember;
+use App\Models\UserProfile;
+use Illuminate\Support\Str;
+use App\Models\GroupInvitation;
+use Laravel\Passport\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
-use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -62,9 +63,26 @@ class User extends Authenticatable
 
     public function groups()
     {
-        return $this->belongsToMany(Group::class)
+        return $this->hasMany(Group::class)->with(['category']);
+    }
+
+    public function supportGroups()
+    {
+        return $this->belongsToMany(Group::class, 'group_member')
             ->using(GroupMember::class)
-            ->withPivot(['created_by', 'created_at', 'updated_at', 'role']);
+            ->wherePivot('role', 'member');
+
+        // return $this->belongsToMany(Group::class, 'group_member')
+        //     ->using(GroupMember::class)
+        //     ->withPivot('role', 'member');
+    }
+
+    public function groupInvitations()
+    {
+        return $this->hasMany(GroupInvitation::class, 'invited_user_id')->with('user')->with('group');
+        // return $this->belongsToMany(Group::class, 'group_invitations', 'invited_user_id')
+        // ->using(GroupInvitation::class)
+        // ->withPivot(['message', 'status', 'user_id']);
     }
 
     public static function generateVerificationCode()

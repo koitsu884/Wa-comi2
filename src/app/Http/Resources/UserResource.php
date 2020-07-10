@@ -16,16 +16,17 @@ class UserResource extends JsonResource
      */
     public function toArray($request)
     {
+        Log::debug('wait');
         return [
             'id' => $this->id,
             'email' => $this->when(Auth::user() != null, $this->email),
             'name' => $this->name,
             'introduction' => $this->introduction,
-            // 'avatar' => $this->avatar,
+            'avatar' => $this->getMainImage(),
             'twitter' => $this->twitter,
             'facebook' => $this->facebook,
             'instagram' => $this->instagram,
-            'admin' => $this->admin ? true : false
+       //     'admin' => $this->admin ? true : false
         ];
     }
 }

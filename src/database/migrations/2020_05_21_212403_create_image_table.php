@@ -16,9 +16,9 @@ class CreateImageTable extends Migration
         Schema::create('images', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned()->nullable();
+            $table->boolean('is_main')->default(false);
             $table->string('title', 100)->nullable();
             $table->string('path', 100);
-            $table->string('filename', 100);
             $table->string('url', 200)->nullable();
             $table->string('url_thumb', 200)->nullable();
             $table->morphs('imageable');

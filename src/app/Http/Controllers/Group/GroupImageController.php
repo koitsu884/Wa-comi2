@@ -1,44 +1,88 @@
 <?php
 
-namespace App\Http\Group\Controllers;
+namespace App\Http\Controllers\Group;
 
 use App\Models\Group;
 use App\Models\Image;
+use App\Models\GroupImage;
+use Illuminate\Http\Request;
+use App\Http\Resources\ImageResource;
+use App\Contracts\ImageManagerContract;
+use App\Http\Controllers\ApiController;
 
-class GroupImageController extends Controller
+const GROUP_IMAGE_MAX_COUNT = 4;
+
+class GroupImageController extends ApiController
 {
+    private $_imageManager;
+    public function __construct(ImageManagerContract $imageManager)
+    {
+        parent::__construct();
+        $this->_imageManager = $imageManager;
+        $this->middleware('auth.api')->except('index');
+        $this->middleware('can:update,group')->only('store');
+        $this->middleware('can:update-group-mainimage,group,image')->only('setMainImage');
+        $this->middleware('can:delete,image')->only('destroy');
+    }
+    
     public function index(Group $group)
     {
-        return ImageResource::collection($group->images());
+        return ImageResource::collection($group->images()->get());
     }
 
     public function store(Request $request, Group $group)
     {
-        //Should upload image here and get url and url_thumb;
-        $url = 'https://res.cloudinary.com/nzworks/image/upload/v1582075194/user/5e4c7712bd2b5b00173964ef/UTNZ%20Banner.jpg_1582075193920.png';
-        $url_thumb = 'https://res.cloudinary.com/nzworks/image/upload/c_thumb,w_200/v1582075194/user/5e4c7712bd2b5b00173964ef/UTNZ%20Banner.jpg_1582075193920.png';
+        $imageCount = $group -> imageCount();
+        if($imageCount >= GROUP_IMAGE_MAX_COUNT){
+            return $this->errorResponse('一つの投稿に添付できる画像は'. GROUP_IMAGE_MAX_COUNT . '枚までです', 400);
+        }
 
-        $group->images()->create([
+        $rules = [
+            'image' => 'required|mimes:jpg,jpeg,png,bmp|max:10000',
+        ];
+        $this->validate($request, $rules);
+
+        $uploadFolder = "images/groups/{$group->id}";
+
+        $path = $this->_imageManager->uploadImage($request->image, $uploadFolder);
+
+        $image = $group->images()->create([
             'user_id' => $request->user()->id,
-            'url' => $url,
-            'url_thumb' => $url_thumb,
+            'url' => $this->_imageManager->getImageFullUrl($path),
+            'is_main' => $imageCount == 0 ? true : false,
+            'path' => $path,
         ]);
 
-        return ImageResource::collection($group->images());
-    }
-
-    public function destroy(Group $group, Image $image)
-    {
-        $this->checkUser(Auth::user(), $group, $image);
-
-        $image->delete();
         return new ImageResource($image);
     }
 
-    protected function checkUser(User $user, Group $group, Image $image)
+    public function destroy(Group $group, GroupImage $image)
     {
-        if ($user->id != $group->user_id && $user->id != $image->user_id) {
-            throw new HttpException(422, 'The specified user is not the owner of the post');
+        $this->_imageManager->deleteImage($image->path);
+        $image->delete();
+
+        if($image->is_main && $group->imageCount() > 0){
+            $altMainImage = $group->images()->first();
+            $altMainImage->is_main = true;
+            $altMainImage->save();
         }
+        
+        return $this->showMessage('deleted');
+    }
+
+    public function setMainImage(Group $group, GroupImage $image)
+    {
+        $currentMainImage = $group->mainImage()->first();
+
+        if($currentMainImage){
+            if($image->id === $currentMainImage->id)
+                return new ImageResource($image);
+            $currentMainImage->is_main = false;
+            $currentMainImage->save();
+        }
+
+        $image->is_main=true;
+        $image->save();
+        return new ImageResource($image);
     }
 }

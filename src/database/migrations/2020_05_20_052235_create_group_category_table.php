@@ -22,7 +22,6 @@ class CreateGroupCategoryTable extends Migration
             ['name' => '語学・エクスチェンジ'],
             ['name' => '育児・子育て'],
             ['name' => 'ビジネス'],
-            ['name' => 'その他'],
         ];
 
         Schema::create('group_categories', function (Blueprint $table) {

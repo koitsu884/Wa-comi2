@@ -17,11 +17,11 @@ class CreateGroupUserTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->integer('group_id')->unsigned();
             $table->enum('role', ['owner', 'organizer', 'member'])->default('member');
-            $table->integer('created_by')->unsigned()->nullable();
+            $table->integer('invited_by')->unsigned()->nullable();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
-            $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('invited_by')->references('id')->on('users')->onDelete('set null');
             $table->unique(['user_id', 'group_id']);
 
             $table->timestamps();

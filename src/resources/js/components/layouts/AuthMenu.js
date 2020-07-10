@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Drawer, Avatar, Button, Typography, IconButton, Box, Divider, List, ListItemIcon, ListItemText, ListItem } from '@material-ui/core';
 import { logout } from '../../actions/authActions';
 import { makeStyles } from '@material-ui/styles';
-import { Cancel, AccountCircle } from '@material-ui/icons';
+import { Cancel, AccountCircle, InsertEmoticon } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
     menu: {
@@ -32,6 +32,7 @@ const AuthMenu = () => {
     const dispatch = useDispatch();
     const classes = useStyles();
     const user = useSelector(state => state.auth.user);
+    const avatar = useSelector(state => state.user.avatar);
     const [menuOpen, setMenuOpen] = useState(false);
 
     const toggleDrawer = () => setMenuOpen(!menuOpen);
@@ -45,7 +46,7 @@ const AuthMenu = () => {
         return (
             <div>
                 {
-                    user && user.avatar ? <Avatar alt="ユーザーメニュー" src={user.avatar} onClick={toggleDrawer} /> : <Avatar alt="ユーザーメニュー" onClick={toggleDrawer}>{user.name.charAt(0)}</Avatar>
+                    avatar ? <Avatar alt="ユーザーメニュー" src={avatar.url} onClick={toggleDrawer} /> : <Avatar alt="ユーザーメニュー" onClick={toggleDrawer}>{user.name.charAt(0)}</Avatar>
                 }
                 <Drawer className={classes.menu} anchor={'right'} open={menuOpen} onClose={() => setMenuOpen(false)} >
                     <div className='header'>
@@ -56,14 +57,17 @@ const AuthMenu = () => {
                     </div>
                     <div className='content'>
                         <List>
-                            <ListItem button  to="/mypage/account" component={Link}  onClick={toggleDrawer} >
+                            <ListItem button to="/mypage/account" component={Link} onClick={toggleDrawer} >
                                 <ListItemIcon><AccountCircle /></ListItemIcon>
                                 <ListItemText primary={'プロフィール・アカウント編集'} />
+                            </ListItem>
+                            <ListItem button to="/mypage/post" component={Link} onClick={toggleDrawer} >
+                                <ListItemIcon><InsertEmoticon /></ListItemIcon>
+                                <ListItemText primary={'『友達募集』投稿編集'} />
                             </ListItem>
                         </List>
                         <Divider />
                         <Box mt={2} mx="auto" >
-
                             <Button variant="contained" color="secondary" onClick={handleLogout}>ログアウト</Button>
                         </Box>
                     </div>

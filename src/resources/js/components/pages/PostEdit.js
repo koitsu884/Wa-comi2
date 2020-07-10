@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Container, Button, Box, makeStyles } from '@material-ui/core';
+import { Container, Button, Box } from '@material-ui/core';
 import { FormContext, useForm } from 'react-hook-form';
+import { getMyPosts } from '../../actions/userActions';
 import history from '../../history';
 import Alert from '../../utils/alert';
 import { TextField } from '../form/TextField';
 import TextAreaField from '../form/TextAreaField';
 import Spinner from '../common/Spinner';
-import SelectImageField from '../form/SelectImageField';
 import ResponsiveFlexBox from '../layouts/ResponsiveFlexBox';
 import { resizeFile } from '../../utils/imageManager';
 import FormErrors from '../common/FormErrors';
 import { SET_ERRORS } from '../../actions/types';
+import MultipleImageSelector from '../common/MultipleImageSelector';
+import ModalMessage from '../common/ModalMessage';
 
 const POST_IMAGE_SIZE_LIMIT = 800;
 
@@ -21,6 +23,8 @@ const PostEdit = (props) => {
     const dispatch = useDispatch();
     const currentUser = useSelector(state => state.auth.user);
     const [loading, setLoading] = useState(false);
+    const [modalMessage, setModalMessage] = useState(null);
+    const [selectedFiles, setFiles] = useState([]);
 
     useEffect(() => {
         if (id) {
@@ -46,6 +50,49 @@ const PostEdit = (props) => {
         }
     }, [id])
 
+    const handleImageSelect = selectedFiles => {
+        setFiles(selectedFiles);
+    }
+
+    const updatePost = async (url, fd) => {
+        await axios.put(url, fd, {
+            headers: { 'content-type': 'multipart/form-data' }
+        });
+        Alert.success("更新しました");
+    }
+
+    const uploadImages = async (url, files) => {
+        for (var file of files) {
+            let fd = new FormData();
+            let resizedFile;
+            try {
+                resizedFile = await resizeFile(file, POST_IMAGE_SIZE_LIMIT, file.name);
+                fd.append('image', resizedFile, resizedFile.name);
+                await axios.post(url, fd);
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+    }
+
+    const addNewPost = async (url, fd) => {
+        var result = await axios.post(url, fd, {
+            headers: { 'content-type': 'multipart/form-data' }
+        });
+
+        if (selectedFiles.length > 0) {
+            setModalMessage("画像をアップロード中です");
+            var newPostId = result.data.data.id;
+            let imageUploadUrl = `/api/posts/${newPostId}/images`;
+            //File upload
+            await uploadImages(imageUploadUrl, selectedFiles);
+        }
+
+        Alert.success("投稿しました");
+        dispatch(getMyPosts(currentUser.id));
+    }
+
     const onSubmit = async submitedData => {
         if (!currentUser) {
             console.log("Current user must be set");
@@ -53,41 +100,24 @@ const PostEdit = (props) => {
         }
 
         setLoading(true);
+        setModalMessage("投稿内容をアップロード中です");
 
         let fd = new FormData();
+        let url = `/api/posts/`;
 
         for (var dataKey in submitedData) {
             let data = submitedData[dataKey];
             switch (dataKey) {
-                case "main_image":
-                    if (data) {
-                        let resizedFile = await resizeFile(data, POST_IMAGE_SIZE_LIMIT, data.name);
-                        fd.append('main_image', resizedFile, resizedFile.name);
-                    }
-                    break;
-
                 default:
                     fd.append(dataKey, data ? data : '');
             }
         }
 
-        let url = `/api/users/${currentUser.id}/posts/`;
-        // let result;
-
         try {
-            if (id) {
-                await axios.put(url, fd, {
-                    headers: { 'content-type': 'multipart/form-data' }
-                });
-                Alert.success("更新しました");
-            }
-            else {
-                await axios.post(url, fd, {
-                    headers: { 'content-type': 'multipart/form-data' }
-                });
-                Alert.success("投稿しました");
-            }
+            id ? await updatePost(url, fd) : await addNewPost(url, fd);
+
             setLoading(false);
+            setModalMessage(null);
         }
         catch (error) {
             let formErrors = error.response.data.errors;
@@ -99,6 +129,7 @@ const PostEdit = (props) => {
                 })
             }
             setLoading(false);
+            setModalMessage(null);
             return;
         }
 
@@ -111,12 +142,17 @@ const PostEdit = (props) => {
             {
                 loading ? <Spinner cover={true} /> : null
             }
+            <ModalMessage
+                open={modalMessage !== null}
+                message={modalMessage}
+            />
+
             <h1>Post Edit</h1>
             <Box>
                 <FormContext {...methods}>
                     <form onSubmit={methods.handleSubmit(onSubmit)}>
                         <ResponsiveFlexBox breakPoint={'sm'}  >
-                            <Box p={2} flexGrow={1}>
+                            <Box p={2} flexGrow={1} minWidth={600}>
                                 <TextField
                                     fullWidth
                                     inputRef={methods.register({ required: true, maxLength: 200 })}
@@ -138,12 +174,12 @@ const PostEdit = (props) => {
                                     rows={10}
                                 />
                             </Box>
-                            <Box p={2}>
-                                <h3>メイン画像</h3>
-                                <SelectImageField
-                                    inputRef={methods.register()}
-                                    name="main_image"
-                                />
+                            <Box p={2} minWidth={400}>
+                                {
+                                    id ?
+                                        null :
+                                        <MultipleImageSelector onImagesSelected={handleImageSelect} maxNum={5} />
+                                }
                             </Box>
                         </ResponsiveFlexBox>
                         <FormErrors />

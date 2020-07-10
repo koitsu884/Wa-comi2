@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ImageResource;
 use App\Models\UserImage;
 use App\User;
+use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -19,8 +20,7 @@ class UserImageController extends ApiController
         parent::__construct();
         $this->_imageManager = $imageManager;
         $this->middleware('auth.api')->except('index');
-        // $this->middleware('can:create,App\Models\UserImage')->only('store');
-        $this->middleware('can:delete,image')->only('destroy');
+        $this->middleware('can:create,App\Models\UserImage')->only('store');
     }
 
     /**
@@ -44,43 +44,27 @@ class UserImageController extends ApiController
     public function store(Request $request, User $user)
     {
         $rules = [
-            'image' => 'required|image',
+            'image' => 'required|mimes:jpg,jpeg,png,bmp|max:10000',
         ];
         $this->validate($request, $rules);
 
-        $uploadPath = "images/users/{$user->id}";
-        $fileName = 'avatar.' .  $request->image->getClientOriginalExtension();
-        Log::debug($request);
-        Log::debug($request->image->getClientOriginalName());
-        //if($request->hasFile())
-        // {
-        //     $urls = ImageRepository::uploadImage($request[$fileColumnName],);
-        // }
+        $uploadFolder = "images/users/{$user->id}";
+   
         if ($user->imageCount() > 0) {
-            $this->_imageManager->deleteImage($user->images[0]->path, $user->images[0]->filename);
-            $user->images[0]->delete();
+            $avatar = $user->mainImage()->first();
+            $this->_imageManager->deleteImage($avatar->path);
+            $avatar->delete();
         }
 
-
-        $url = $this->_imageManager->uploadImage($request->image, $uploadPath, $fileName);
-        Log::debug($url);
+        $path = $this->_imageManager->uploadImage($request->image, $uploadFolder);
 
         $image = $user->images()->create([
             'user_id' => $request->user()->id,
-            'url' => $url,
+            'url' => $this->_imageManager->getImageFullUrl($path),
             // 'url_thumb' => $url_thumb,
             'is_main' => true,
-            'path' => $uploadPath,
-            'filename' => $fileName,
+            'path' => $path,
         ]);
-
-        // $image = UserImage::create([
-        //     'user_id' => $request->user()->id,
-        //     'url' => $url,
-        //     // 'url_thumb' => $url + 'thumb', TODO: Need to build thumb url somehow
-        //     'is_main' => true
-        // ]);
-        Log::debug($image);
 
         return new ImageResource($image);
     }
@@ -91,21 +75,10 @@ class UserImageController extends ApiController
      * @param  \App\Image  $image
      * @return \Illuminate\Http\Response
      */
-    public function show(Image $image)
+    public function show(User $user)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Image  $image
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Image $image)
-    {
-        //
+        $avatar = $user->mainImage()->first();
+        return $avatar ? new ImageResource($avatar) : null;
     }
 
     /**
@@ -114,8 +87,13 @@ class UserImageController extends ApiController
      * @param  \App\Image  $image
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Image $image)
+    public function destroy(User $user)
     {
-        //
+        $avatar = $user->getMainImage();
+        if($avatar)
+        {
+            $avatar->delete();
+        }
+        return $this->showMessage('deleted');
     }
 }

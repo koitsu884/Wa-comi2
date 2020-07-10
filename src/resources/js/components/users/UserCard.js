@@ -39,7 +39,7 @@ const UserCard = ({ user }) => {
             {user.avatar ?
                 <CardMedia
                     className={classes.media}
-                    image={user.avatar}
+                    image={user.avatar.url}
                     title="User avatar"
                 />
                 : null

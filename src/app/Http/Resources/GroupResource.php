@@ -16,6 +16,7 @@ class GroupResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'slug' => $this->slug,
             'user_id' => $this->user_id,
             'user' => new UserResource($this->whenLoaded('user')),
             'area_id' => $this->area_id,
@@ -23,14 +24,14 @@ class GroupResource extends JsonResource
             'group_category_id' => (string) $this->group_category_id,
             'category' => new GroupCategoryResource($this->whenLoaded('category')),
             'name' => $this->name,
+            'main_image' => $this->getMainImage(),
+            'images' => ImageResource::collection($this->whenLoaded('images')),
             'is_public' => $this->is_public,
             'description' => $this->description,
             'homepage' => $this->homepage,
             'facebook' => $this->facebook,
             'twitter' => $this->twitter,
             'instagram' => $this->instagram,
-            'main_image' => $this->main_image,
-            'main_image_thumb' => $this->main_image_thumb,
             'created_at' => (string) $this->created_at,
             'updated_at' => (string) $this->updated_at,
         ];

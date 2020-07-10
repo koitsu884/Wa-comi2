@@ -11,10 +11,17 @@ class GroupMember extends Pivot
     use UserRelatable;
     use GroupRelatable;
 
+    protected $table="group_member";
+
     protected $fillable = [
         'user_id',
         'group_id',
-        'created_by',
+        'invited_by',
         'role'
     ];
+
+    public function invited_by_user()
+    {
+        return $this->belongsTo(User::class, 'invited_by');
+    } 
 }

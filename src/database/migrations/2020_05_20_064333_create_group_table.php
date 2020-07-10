@@ -15,12 +15,11 @@ class CreateGroupTable extends Migration
     {
         Schema::create('groups', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('slug', 100)->unique();
             $table->integer('user_id')->unsigned()->nullable();
             $table->integer('group_category_id')->unsigned()->nullable();
             $table->integer('area_id')->unsigned()->nullable();
             $table->string('name', 100);
-            $table->string('main_image', 200)->nullable();
-            $table->string('main_image_thumb', 200)->nullable();
             $table->boolean('is_public')->default(true);
             $table->enum('invitation_role', ['owner', 'organizer', 'member', 'anyone'])->default('anyone');
             $table->string('description', 5000);

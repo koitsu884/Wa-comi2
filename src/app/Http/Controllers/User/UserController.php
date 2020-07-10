@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Http\Controllers\ApiController;
-use App\Http\Resources\UserResource;
 use App\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Http\Resources\UserResource;
+use App\Http\Resources\UserSearchResource;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends ApiController
@@ -142,5 +143,28 @@ class UserController extends ApiController
         // $user->save();
         // return new UserResource($user);
         return $this->successResponse('ok', 200);
+    }
+
+    public function search($search){
+        $requestUser = Auth::user();
+        $users = null;
+
+        if(is_numeric($search))
+        {
+            $users = User::where([
+                ['id', (int)$search], 
+                ['id', '<>', $requestUser->id],
+                ['admin', false]
+            ])->take(1)->get();
+        }
+        else{
+            $users = User::where([
+                ['name', 'like', '%' . $search . '%'],
+                ['id', '<>', $requestUser->id],
+                ['admin', false],
+            ])->take(10)->get();
+        }
+
+        return UserSearchResource::collection($users);
     }
 }

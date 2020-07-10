@@ -24,6 +24,11 @@ class GroupFilter extends QueryFilter
         $this->builder->where('group_category_id', $categoryId);
     }
 
+    public function categories($categoryIds)
+    {
+        $this->builder->whereIn('group_category_id', $categoryIds);
+    }
+
     public function area(int $areaId)
     {
         $this->builder->where('area_id', $areaId);

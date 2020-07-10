@@ -3,29 +3,43 @@ import { makeStyles, IconButton } from '@material-ui/core';
 import { Cancel } from '@material-ui/icons';
 import NoImage from '../../../images/noImage.jpg';
 
-const useStyles = makeStyles((theme) => ({
-    imagePreview: {
-        width: 300,
-        height: 300,
+const useStyles = makeStyles({
+    imagePreview: props=>( {
+        width: props.width,
+        height: props.height,
         position: 'relative',
         margin: '1rem 0',
         '& img': {
             width: '100%',
             height: '100%',
-            objectFit: 'contain'
+            objectFit: props.objectFit
         }
-    },
+    }),
     clearButton: {
         position: 'absolute',
         width: 30,
         height: 30,
         top: 2,
         right: 2
-    }
-}));
+    },
+});
 
-const ImagePreview = ({ previewUrl, handleCancel, enableCancelButton = false }) => {
-    const classes = useStyles();
+const ImagePreview = ({ 
+        width =300,
+        height=300,
+        objectFit='contain',
+        previewUrl, 
+        handleCancel, 
+        enableCancelButton = false
+    
+    }) => {
+    const classes = useStyles({
+        width: width,
+        height: height,
+        objectFit: objectFit,
+    });
+
+    console.log(classes);
 
     return (
         <div className={classes.imagePreview}>

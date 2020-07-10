@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/{any}', function () {
-    return view('index');
-})->where('any', '^((?!api).)*$');
+// * Sepalating Frontend completely *
+
+// Route::get('/{any}', function () {
+//     return view('index');
+// })->where('any', '^((?!api).)*$');

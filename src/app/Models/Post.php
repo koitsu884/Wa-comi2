@@ -24,11 +24,6 @@ class Post extends Model
         'area_id',
     ];
 
-    public function comments()
-    {
-        return $this->hasMany(PostComment::class);
-    }
-
     public function area()
     {
         return $this->belongsTo(Area::class);

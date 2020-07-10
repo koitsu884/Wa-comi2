@@ -12,7 +12,7 @@ import history from '../history';
 import { Home } from './pages/Home';
 import { Register } from './pages/Register';
 import { Login } from './pages/Login';
-import { Toolbar, Hidden, BottomNavigation, Box, CssBaseline } from '@material-ui/core';
+import { Hidden, CssBaseline } from '@material-ui/core';
 import BackToTop from './layouts/BackToTop';
 import Post from './pages/Post';
 import Group from './pages/Group';
@@ -24,7 +24,7 @@ import NotFound from './pages/NotFound';
 import PostEdit from './pages/PostEdit';
 import PrivateRoute from './PrivateRoute';
 import MyAccount from './pages/MyAccount';
-import { Translate } from '@material-ui/icons';
+import MyPost from './pages/MyPost';
 
 const theme = createMuiTheme({
     typography: {
@@ -87,7 +87,13 @@ const App = () => {
         dispatch(getGroupCategories());
         dispatch(getPostCategories());
         dispatch(getCurrentUser());
-    }, [dispatch, getAreaList, getGroupCategories, getPostCategories, getCurrentUser])
+    }, [
+        dispatch,
+        getAreaList,
+        getGroupCategories,
+        getPostCategories,
+        getCurrentUser,
+    ])
 
     return (
         <ThemeProvider theme={theme}>
@@ -101,6 +107,7 @@ const App = () => {
                     <Route path="/register" exact component={Register} />
                     <Route path="/login" exact component={Login} />
                     <PrivateRoute path="/mypage/account" exact component={MyAccount} />
+                    <PrivateRoute path="/mypage/post" exact component={MyPost} />
                     <Route path="/post" exact component={Post} />
                     <PrivateRoute path="/post/edit/:id" exact component={PostEdit} />
                     <PrivateRoute path="/post/edit" exact component={PostEdit} />

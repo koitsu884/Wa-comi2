@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers\Post;
 
+use App\Models\Post;
+use App\Models\PostComment;
+use Illuminate\Http\Request;
 use App\Http\Controllers\ApiController;
 use App\Http\Resources\CommentResource;
-use App\Models\Post;
-use Illuminate\Http\Request;
 
 class PostCommentController extends ApiController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->middleware('auth.api')->except(['index', 'show']);
+        $this->middleware('can:delete,comment')->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +24,7 @@ class PostCommentController extends ApiController
      */
     public function index(Post $post)
     {
-        return CommentResource::collection($post->comments());
+        return CommentResource::collection($post->comments()->orderByDesc('created_at')->with('user')->withCount('replies')->paginate(3));
     }
 
     /**
@@ -25,9 +33,22 @@ class PostCommentController extends ApiController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, Post $post)
     {
-        //
+        $rules = [
+            'comment' => 'required|max:1000',
+        ];
+
+        $this->validate($request, $rules);
+
+        $data = $request->all();
+        $data['user_id'] = $request->user()->id;
+
+        $comment = $post->comments()->create($data);
+
+        // $post = Post::create($data);
+
+        return new CommentResource($comment);
     }
 
     /**
@@ -37,7 +58,7 @@ class PostCommentController extends ApiController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, PostComment $comment)
     {
         //
     }
@@ -48,8 +69,10 @@ class PostCommentController extends ApiController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Post $post, PostComment $comment)
     {
-        //
+        $comment->delete();
+        
+        return new CommentResource($comment);
     }
 }
