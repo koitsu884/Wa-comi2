@@ -50,6 +50,7 @@ Route::resource('groups.invitations', 'Group\GroupInvitationController', ['only'
  */
 Route::resource('groups.posts', 'Group\GroupPostController', ['except' => ['edit', 'create']]);
 Route::resource('groups.posts.images', 'Group\GroupPostImageController', ['only' => ['store', 'destroy', 'index']]);
+Route::name('groups.posts.images.setmain')->patch('groups/{group}/posts/{post}/images/{image}/setmain', 'Group\GroupPostImageController@setMainImage');
 
 /**
  * Etc

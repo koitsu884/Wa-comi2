@@ -8,6 +8,7 @@ use App\Http\Requests\StoreImage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Contracts\ImageManagerContract;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class ImageHelper
@@ -23,14 +24,14 @@ class ImageHelper
         $this->_maxCount = $count;
     }
 
-    public function addImage(Model $model, $data, $uploadFolter)
+    public function addImage(Model $model, $imageData, $uploadFolter)
     {
         $imageCount = $model -> imageCount();
         if($this->_maxCount > 0 &&  $imageCount >= $this->_maxCount){
             return $this->errorResponse('一つの投稿に添付できる画像は'. getImageMaxCount() . '枚までです', 400);
         }
 
-        $path = $this->_imageManager->uploadImage($request->image, $uploadFolter);
+        $path = $this->_imageManager->uploadImage($imageData, $uploadFolter);
 
         return $model->images()->create([
             'user_id' => Auth::user()->id,

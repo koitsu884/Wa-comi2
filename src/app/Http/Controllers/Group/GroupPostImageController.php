@@ -13,23 +13,27 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ImageResource;
 use App\Contracts\ImageManagerContract;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\ImageController;
 
 const GROUP_POST_IMAGE_MAX_COUNT = 4;
 
-class GroupPostImageController extends ApiController
+class GroupPostImageController extends ImageController
 {
-    private $_imageHelper;
     public function __construct(ImageManagerContract $imageManager)
     {
         parent::__construct();
+        $this->_imageManager = $imageManager;
         $this->middleware('auth.api')->except('index');
         $this->middleware('can:update,post')->only(['store', 'setMainImage']);
     //    $this->middleware('can:update-post-mainimage,post,image')->only('setMainImage');
-        $this->middleware('can:delete,image')->only('destroy');
-        $this->_imageHelper = new ImageHelper($imageManager);
-        $this->_imageHelper->setMaxCount(GROUP_POST_IMAGE_MAX_COUNT);
+       // $this->middleware('can:delete,image')->only('destroy');
+        // $this->_imageHelper = new ImageHelper($imageManager);
+        // $this->_imageHelper->setMaxCount(GROUP_POST_IMAGE_MAX_COUNT);
     }
 
+    public function getMaxImageCount(){
+        return GROUP_POST_IMAGE_MAX_COUNT;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -40,6 +44,7 @@ class GroupPostImageController extends ApiController
         return ImageResource::collection($post->images()->get());
     }
 
+    
     /**
      * Store a newly created resource in storage.
      *
@@ -48,12 +53,8 @@ class GroupPostImageController extends ApiController
      */
     public function store(StoreImage $request, Group $group, GroupPost $post)
     {
-        $data = $request->validated();
-
         $uploadFolder = "images/groups/{$group->id}/posts/{$post->id}";
-        $image = $this->imageHelper->addImage($post, $data, $uploadFolder);
-
-        return new ImageResource($image);
+        return $this->storeImage($request, $post, $uploadFolder);
     }
 
     /**
@@ -87,7 +88,11 @@ class GroupPostImageController extends ApiController
      */
     public function destroy(Group $group, GroupPost $post, GroupPostImage $image)
     {
-        $this->_imageHelper->deleteImage($post, $image);
-        return new ImageResource($image);
+        return $this->deleteImage($post, $image);
+    }
+
+    public function setMainImage(Group $group, GroupPost $post, GroupPostImage $image)
+    {
+        return parent::setMainAndRespond($post, $image);
     }
 }
