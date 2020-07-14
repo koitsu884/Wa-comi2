@@ -24,11 +24,7 @@ class GroupPostImageController extends ImageController
         parent::__construct();
         $this->_imageManager = $imageManager;
         $this->middleware('auth.api')->except('index');
-        $this->middleware('can:update,post')->only(['store', 'setMainImage']);
-    //    $this->middleware('can:update-post-mainimage,post,image')->only('setMainImage');
-       // $this->middleware('can:delete,image')->only('destroy');
-        // $this->_imageHelper = new ImageHelper($imageManager);
-        // $this->_imageHelper->setMaxCount(GROUP_POST_IMAGE_MAX_COUNT);
+        $this->middleware('can:update,post')->only(['store', 'setMainImage', 'destroy']);
     }
 
     public function getMaxImageCount(){
@@ -55,29 +51,6 @@ class GroupPostImageController extends ImageController
     {
         $uploadFolder = "images/groups/{$group->id}/posts/{$post->id}";
         return $this->storeImage($request, $post, $uploadFolder);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\GroupPostImage  $groupPostImage
-     * @return \Illuminate\Http\Response
-     */
-    public function show(GroupPostImage $groupPostImage)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\GroupPostImage  $groupPostImage
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, GroupPostImage $image)
-    {
-        //
     }
 
     /**

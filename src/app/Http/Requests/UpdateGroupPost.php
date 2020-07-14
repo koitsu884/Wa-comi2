@@ -26,7 +26,7 @@ class UpdateGroupPost extends FormRequest
         return [
             'title' => 'nullable|max:100',
             'content' => 'nullable',
-            'youtube' => 'nullable|regex:/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$/'
+            'youtube' => ['nullable', 'regex:/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$/']
         ];
     }
 }
